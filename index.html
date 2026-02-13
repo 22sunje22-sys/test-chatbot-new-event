@@ -1,1547 +1,1454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Build Assistant | Platinumlist</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --platinum-storm: #0A181C;
-            --black: #000000;
-            --platinum-monday: #79E2FF;
-            --platinum-suede: #00A5D3;
-            --platinum-day: #C7F88A;
-            --platinum-electro: #221327;
-            --white: #FFFFFF;
-            --gray: #8899A6;
-            --dark-gray: #1a2a30;
-            --error: #FF6B6B;
-            --success: #C7F88A;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--black);
-            color: var(--white);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            background: var(--platinum-storm);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(121, 226, 255, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            width: 32px;
-            height: 32px;
-            background: var(--platinum-monday);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--black);
-            font-size: 14px;
-        }
-
-        .header-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .header-subtitle {
-            font-size: 12px;
-            color: var(--gray);
-            margin-left: auto;
-        }
-
-        /* Progress */
-        .progress-container {
-            position: fixed;
-            top: 65px;
-            left: 0;
-            right: 0;
-            z-index: 99;
-            background: var(--black);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 6px;
-            background: var(--dark-gray);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--platinum-suede), var(--platinum-monday));
-            transition: width 0.4s ease;
-            width: 0%;
-            border-radius: 3px;
-        }
-
-        .progress-text {
-            font-size: 12px;
-            color: var(--gray);
-            min-width: 60px;
-            text-align: right;
-        }
-
-        /* Chat Container */
-        .chat-container {
-            flex: 1;
-            max-width: 700px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 130px 24px 40px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Messages */
-        .message {
-            display: flex;
-            gap: 12px;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .message.bot .message-avatar {
-            background: var(--platinum-monday);
-            color: var(--black);
-        }
-
-        .message.user .message-avatar {
-            background: var(--platinum-suede);
-            color: var(--white);
-        }
-
-        .message-content {
-            max-width: 75%;
-        }
-
-        .message-bubble {
-            padding: 16px 20px;
-            border-radius: 20px;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .message.bot .message-bubble {
-            background: var(--platinum-storm);
-            border-bottom-left-radius: 6px;
-        }
-
-        .message.user .message-bubble {
-            background: var(--platinum-suede);
-            border-bottom-right-radius: 6px;
-        }
-
-        .message-bubble strong {
-            color: var(--platinum-monday);
-        }
-
-        .message.user .message-bubble strong {
-            color: var(--white);
-        }
-
-        /* Typing indicator */
-        .typing-indicator {
-            display: flex;
-            gap: 5px;
-            padding: 8px 0;
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: var(--platinum-monday);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Input Controls */
-        .input-controls {
-            margin-top: 12px;
-        }
-
-        /* Choice Buttons */
-        .choice-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .choice-btn {
-            padding: 14px 24px;
-            background: var(--dark-gray);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            color: var(--white);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .choice-btn:hover {
-            background: rgba(121, 226, 255, 0.15);
-            border-color: var(--platinum-monday);
-        }
-
-        .choice-btn.selected {
-            background: var(--platinum-monday);
-            color: var(--black);
-            border-color: var(--platinum-monday);
-        }
-
-        /* Text Input */
-        .text-input-wrapper {
-            display: flex;
-            gap: 10px;
-        }
-
-        .text-input {
-            flex: 1;
-            padding: 14px 18px;
-            background: var(--dark-gray);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            color: var(--white);
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .text-input:focus {
-            border-color: var(--platinum-monday);
-            background: var(--platinum-storm);
-        }
-
-        .text-input::placeholder {
-            color: var(--gray);
-        }
-
-        textarea.text-input {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        /* Date Picker */
-        .date-picker {
-            background: var(--dark-gray);
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 320px;
-        }
-
-        .date-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .date-nav {
-            background: transparent;
-            border: none;
-            color: var(--platinum-monday);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .date-nav:hover {
-            background: rgba(121, 226, 255, 0.1);
-        }
-
-        .date-month-year {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .date-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-
-        .date-weekday {
-            text-align: center;
-            font-size: 11px;
-            color: var(--gray);
-            padding: 8px 0;
-            font-weight: 500;
-        }
-
-        .date-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .date-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
-            border: none;
-            color: var(--white);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .date-day:hover:not(.disabled):not(.empty) {
-            background: rgba(121, 226, 255, 0.2);
-        }
-
-        .date-day.selected {
-            background: var(--platinum-monday);
-            color: var(--black);
-            font-weight: 600;
-        }
-
-        .date-day.today {
-            border: 2px solid var(--platinum-suede);
-        }
-
-        .date-day.disabled {
-            color: var(--gray);
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .date-day.empty {
-            cursor: default;
-        }
-
-        /* Time Picker */
-        .time-picker {
-            background: var(--dark-gray);
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 280px;
-        }
-
-        .time-display {
-            text-align: center;
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--platinum-monday);
-            margin-bottom: 20px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .time-selectors {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .time-selector {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .time-selector label {
-            font-size: 11px;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .time-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .time-btn {
-            width: 50px;
-            height: 36px;
-            background: var(--platinum-storm);
-            border: none;
-            border-radius: 8px;
-            color: var(--white);
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .time-btn:hover {
-            background: var(--platinum-monday);
-            color: var(--black);
-        }
-
-        .time-value {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 600;
-            background: var(--platinum-storm);
-            border-radius: 10px;
-        }
-
-        /* Number Input */
-        .number-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--dark-gray);
-            border-radius: 12px;
-            padding: 8px;
-            max-width: 200px;
-        }
-
-        .number-btn {
-            width: 44px;
-            height: 44px;
-            background: var(--platinum-storm);
-            border: none;
-            border-radius: 10px;
-            color: var(--platinum-monday);
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .number-btn:hover {
-            background: var(--platinum-monday);
-            color: var(--black);
-        }
-
-        .number-display {
-            flex: 1;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        /* Submit Button */
-        .submit-btn {
-            padding: 16px 32px;
-            background: var(--platinum-monday);
-            border: none;
-            border-radius: 12px;
-            color: var(--black);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .submit-btn:hover {
-            background: var(--platinum-day);
-            transform: translateY(-2px);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Skip Button */
-        .skip-btn {
-            padding: 12px 20px;
-            background: transparent;
-            border: 1px solid var(--gray);
-            border-radius: 10px;
-            color: var(--gray);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .skip-btn:hover {
-            border-color: var(--platinum-monday);
-            color: var(--platinum-monday);
-        }
-
-        /* Action Row */
-        .action-row {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            align-items: center;
-        }
-
-        /* Ticket Builder */
-        .ticket-builder {
-            background: var(--dark-gray);
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 400px;
-        }
-
-        .ticket-item {
-            background: var(--platinum-storm);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .ticket-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .ticket-item-title {
-            font-weight: 600;
-            color: var(--platinum-monday);
-        }
-
-        .ticket-remove {
-            background: transparent;
-            border: none;
-            color: var(--error);
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .ticket-fields {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .ticket-field {
-            display: flex;
-            gap: 10px;
-        }
-
-        .ticket-field input {
-            flex: 1;
-            padding: 10px 14px;
-            background: var(--dark-gray);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            color: var(--white);
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .ticket-field input:focus {
-            border-color: var(--platinum-monday);
-            outline: none;
-        }
-
-        .ticket-field input::placeholder {
-            color: var(--gray);
-        }
-
-        .add-ticket-btn {
-            width: 100%;
-            padding: 14px;
-            background: transparent;
-            border: 2px dashed var(--gray);
-            border-radius: 12px;
-            color: var(--gray);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .add-ticket-btn:hover {
-            border-color: var(--platinum-monday);
-            color: var(--platinum-monday);
-        }
-
-        /* Summary Card */
-        .summary-card {
-            background: var(--platinum-storm);
-            border-radius: 20px;
-            padding: 28px;
-            border: 1px solid rgba(121, 226, 255, 0.2);
-        }
-
-        .summary-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .summary-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--platinum-monday);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .summary-title {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .summary-subtitle {
-            font-size: 13px;
-            color: var(--gray);
-        }
-
-        .summary-section {
-            margin-bottom: 20px;
-        }
-
-        .summary-section-title {
-            font-size: 12px;
-            color: var(--platinum-monday);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .summary-item {
-            display: flex;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-        }
-
-        .summary-label {
-            color: var(--gray);
-            font-size: 13px;
-            width: 130px;
-            flex-shrink: 0;
-        }
-
-        .summary-value {
-            font-size: 14px;
-            color: var(--white);
-            flex: 1;
-        }
-
-        .summary-value.skipped {
-            color: var(--gray);
-            font-style: italic;
-        }
-
-        .copy-btn {
-            width: 100%;
-            padding: 16px 24px;
-            background: var(--platinum-day);
-            color: var(--black);
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .copy-btn:hover {
-            transform: scale(1.02);
-        }
-
-        .copy-btn.copied {
-            background: var(--success);
-        }
-
-        /* Error */
-        .error-message {
-            color: var(--error);
-            font-size: 13px;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Mobile */
-        @media (max-width: 600px) {
-            .message-content {
-                max-width: 90%;
-            }
-
-            .header-subtitle {
-                display: none;
-            }
-
-            .date-picker, .time-picker, .ticket-builder {
-                max-width: 100%;
-            }
-
-            .summary-item {
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .summary-label {
-                width: auto;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Build Assistant | Platinumlist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --platinum-storm: #0A181C;
+      --black: #000000;
+      --platinum-monday: #79E2FF;
+      --platinum-suede: #00A5D3;
+      --platinum-day: #C7F88A;
+      --platinum-electro: #221327;
+      --white: #FFFFFF;
+      --gray: #8899A6;
+      --dark-gray: #1a2a30;
+      --error: #FF6B6B;
+      --success: #C7F88A;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      background: var(--platinum-storm);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(121, 226, 255, 0.2);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      width: 32px; height: 32px;
+      background: var(--platinum-monday);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--black); font-size: 14px;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; color: var(--white); }
+    .header-subtitle { font-size: 12px; color: var(--gray); margin-left: auto; }
+
+    /* Progress */
+    .progress-container {
+      position: fixed;
+      top: 65px; left: 0; right: 0;
+      z-index: 99;
+      background: var(--black);
+      padding: 12px 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .progress-bar {
+      flex: 1; height: 6px;
+      background: var(--dark-gray);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--platinum-suede), var(--platinum-monday));
+      transition: width 0.4s ease;
+      width: 0%;
+      border-radius: 3px;
+    }
+
+    .progress-text { font-size: 12px; color: var(--gray); min-width: 60px; text-align: right; }
+
+    /* Chat Container */
+    .chat-container {
+      flex: 1; max-width: 700px; width: 100%;
+      margin: 0 auto;
+      padding: 130px 24px 40px;
+      display: flex; flex-direction: column;
+    }
+
+    .chat-messages { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Messages */
+    .message { display: flex; gap: 12px; animation: fadeIn 0.4s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .message-avatar {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 14px; flex-shrink: 0;
+    }
+
+    .message.bot .message-avatar { background: var(--platinum-monday); color: var(--black); }
+    .message.user .message-avatar { background: var(--platinum-suede); color: var(--white); }
+
+    .message-content { max-width: 75%; }
+
+    .message-bubble {
+      padding: 16px 20px;
+      border-radius: 20px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .message.bot .message-bubble {
+      background: var(--platinum-storm);
+      border-bottom-left-radius: 6px;
+    }
+
+    .message.user .message-bubble {
+      background: var(--platinum-suede);
+      border-bottom-right-radius: 6px;
+    }
+
+    .message-bubble strong { color: var(--platinum-monday); }
+    .message.user .message-bubble strong { color: var(--white); }
+
+    /* Typing indicator */
+    .typing-indicator { display: flex; gap: 5px; padding: 8px 0; }
+
+    .typing-indicator span {
+      width: 8px; height: 8px;
+      background: var(--platinum-monday);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Input Controls */
+    .input-controls { margin-top: 12px; }
+
+    /* Choice Buttons */
+    .choice-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .choice-btn {
+      padding: 14px 24px;
+      background: var(--dark-gray);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: var(--white);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .choice-btn:hover {
+      background: rgba(121, 226, 255, 0.15);
+      border-color: var(--platinum-monday);
+    }
+
+    .choice-btn.selected {
+      background: var(--platinum-monday);
+      color: var(--black);
+      border-color: var(--platinum-monday);
+    }
+
+    /* Text Input */
+    .text-input-wrapper { display: flex; gap: 10px; }
+
+    .text-input {
+      flex: 1;
+      padding: 14px 18px;
+      background: var(--dark-gray);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: var(--white);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .text-input:focus { border-color: var(--platinum-monday); background: var(--platinum-storm); }
+    .text-input::placeholder { color: var(--gray); }
+    textarea.text-input { min-height: 100px; resize: vertical; }
+
+    /* Date Picker */
+    .date-picker {
+      background: var(--dark-gray);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 320px;
+    }
+
+    .date-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .date-nav {
+      background: transparent; border: none;
+      color: var(--platinum-monday);
+      font-size: 20px; cursor: pointer;
+      padding: 8px; border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .date-nav:hover { background: rgba(121, 226, 255, 0.1); }
+    .date-month-year { font-weight: 600; font-size: 16px; }
+
+    .date-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px; margin-bottom: 8px;
+    }
+
+    .date-weekday {
+      text-align: center; font-size: 11px;
+      color: var(--gray); padding: 8px 0; font-weight: 500;
+    }
+
+    .date-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .date-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      font-size: 14px; cursor: pointer;
+      transition: all 0.2s;
+      background: transparent; border: none;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .date-day:hover:not(.disabled):not(.empty) { background: rgba(121, 226, 255, 0.2); }
+    .date-day.selected { background: var(--platinum-monday); color: var(--black); font-weight: 600; }
+    .date-day.today { border: 2px solid var(--platinum-suede); }
+    .date-day.disabled { color: var(--gray); opacity: 0.3; cursor: not-allowed; }
+    .date-day.empty { cursor: default; }
+
+    /* Time Picker */
+    .time-picker {
+      background: var(--dark-gray);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 280px;
+    }
+
+    .time-display {
+      text-align: center; font-size: 48px; font-weight: 700;
+      color: var(--platinum-monday); margin-bottom: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-selectors { display: flex; gap: 20px; justify-content: center; }
+
+    .time-selector {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+    }
+
+    .time-selector label {
+      font-size: 11px; color: var(--gray);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .time-buttons { display: flex; flex-direction: column; gap: 4px; }
+
+    .time-btn {
+      width: 50px; height: 36px;
+      background: var(--platinum-storm);
+      border: none; border-radius: 8px;
+      color: var(--white); font-size: 18px;
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    .time-btn:hover { background: var(--platinum-monday); color: var(--black); }
+
+    .time-value {
+      width: 50px; height: 50px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 600;
+      background: var(--platinum-storm); border-radius: 10px;
+    }
+
+    /* Number Input */
+    .number-input-wrapper {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--dark-gray);
+      border-radius: 12px;
+      padding: 8px;
+      max-width: 200px;
+    }
+
+    .number-btn {
+      width: 44px; height: 44px;
+      background: var(--platinum-storm);
+      border: none; border-radius: 10px;
+      color: var(--platinum-monday);
+      font-size: 24px; cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .number-btn:hover { background: var(--platinum-monday); color: var(--black); }
+    .number-display { flex: 1; text-align: center; font-size: 24px; font-weight: 600; }
+
+    /* Submit Button */
+    .submit-btn {
+      padding: 16px 32px;
+      background: var(--platinum-monday);
+      border: none; border-radius: 12px;
+      color: var(--black);
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .submit-btn:hover { background: var(--platinum-day); transform: translateY(-2px); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Skip Button */
+    .skip-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: 1px solid var(--gray);
+      border-radius: 10px;
+      color: var(--gray);
+      font-size: 13px; cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .skip-btn:hover { border-color: var(--platinum-monday); color: var(--platinum-monday); }
+
+    /* Action Row */
+    .action-row { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
+
+    /* Ticket Builder */
+    .ticket-builder {
+      background: var(--dark-gray);
+      border-radius: 16px;
+      padding: 20px; max-width: 400px;
+    }
+
+    .ticket-item {
+      background: var(--platinum-storm);
+      border-radius: 12px;
+      padding: 16px; margin-bottom: 12px;
+    }
+
+    .ticket-item-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 12px;
+    }
+
+    .ticket-item-title { font-weight: 600; color: var(--platinum-monday); }
+
+    .ticket-remove {
+      background: transparent; border: none;
+      color: var(--error); cursor: pointer; font-size: 18px;
+    }
+
+    .ticket-fields { display: flex; flex-direction: column; gap: 10px; }
+    .ticket-field { display: flex; gap: 10px; }
+
+    .ticket-field input {
+      flex: 1; padding: 10px 14px;
+      background: var(--dark-gray);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--white); font-size: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .ticket-field input:focus { border-color: var(--platinum-monday); outline: none; }
+    .ticket-field input::placeholder { color: var(--gray); }
+
+    .add-ticket-btn {
+      width: 100%; padding: 14px;
+      background: transparent;
+      border: 2px dashed var(--gray);
+      border-radius: 12px;
+      color: var(--gray); font-size: 14px;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .add-ticket-btn:hover { border-color: var(--platinum-monday); color: var(--platinum-monday); }
+
+    /* Summary Card */
+    .summary-card {
+      background: var(--platinum-storm);
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid rgba(121, 226, 255, 0.2);
+    }
+
+    .summary-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .summary-icon {
+      width: 48px; height: 48px;
+      background: var(--platinum-monday);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+
+    .summary-title { font-size: 20px; font-weight: 700; }
+    .summary-subtitle { font-size: 13px; color: var(--gray); }
+
+    .summary-section { margin-bottom: 20px; }
+
+    .summary-section-title {
+      font-size: 12px; color: var(--platinum-monday);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .summary-item {
+      display: flex;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: center;
+    }
+
+    .summary-item:last-child { border-bottom: none; }
+    .summary-label { color: var(--gray); font-size: 13px; width: 130px; flex-shrink: 0; }
+    .summary-value { font-size: 14px; color: var(--white); flex: 1; }
+    .summary-value.skipped { color: var(--gray); font-style: italic; }
+
+    /* Edit Button in Summary */
+    .edit-btn {
+      background: transparent;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      color: var(--gray);
+      font-size: 12px;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .edit-btn:hover {
+      border-color: var(--platinum-monday);
+      color: var(--platinum-monday);
+      background: rgba(121, 226, 255, 0.1);
+    }
+
+    /* Edit Modal Overlay */
+    .edit-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .edit-modal {
+      background: var(--platinum-storm);
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 450px;
+      width: 100%;
+      border: 1px solid rgba(121, 226, 255, 0.3);
+    }
+
+    .edit-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--platinum-monday);
+      margin-bottom: 16px;
+    }
+
+    .edit-modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .edit-cancel-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: 1px solid var(--gray);
+      border-radius: 10px;
+      color: var(--gray);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .edit-cancel-btn:hover { border-color: var(--error); color: var(--error); }
+
+    .edit-save-btn {
+      padding: 12px 20px;
+      background: var(--platinum-monday);
+      border: none;
+      border-radius: 10px;
+      color: var(--black);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .edit-save-btn:hover { background: var(--platinum-day); }
+
+    .copy-btn {
+      width: 100%; padding: 16px 24px;
+      background: var(--platinum-day);
+      color: var(--black); border: none; border-radius: 12px;
+      font-weight: 600; cursor: pointer; font-size: 15px;
+      transition: all 0.2s; font-family: 'Inter', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-top: 20px;
+    }
+
+    .copy-btn:hover { transform: scale(1.02); }
+    .copy-btn.copied { background: var(--success); }
+
+    /* Error */
+    .error-message {
+      color: var(--error); font-size: 13px; margin-top: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .message-content { max-width: 90%; }
+      .header-subtitle { display: none; }
+      .date-picker, .time-picker, .ticket-builder { max-width: 100%; }
+      .summary-item { flex-direction: column; gap: 4px; }
+      .summary-label { width: auto; }
+      .edit-btn { margin-left: 0; margin-top: 4px; }
+    }
+  </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">P</div>
-        <span class="header-title">Event Build Assistant</span>
-        <span class="header-subtitle">Tech Manager Form</span>
-    </header>
+  <header class="header">
+    <div class="logo">P</div>
+    <span class="header-title">Event Build Assistant</span>
+    <span class="header-subtitle">Tech Manager Form</span>
+  </header>
 
-    <div class="progress-container">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <span class="progress-text" id="progress-text">0 / 15</span>
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
     </div>
+    <span class="progress-text" id="progress-text">0 / 13</span>
+  </div>
 
-    <div class="chat-container">
-        <div class="chat-messages" id="chat-messages"></div>
-    </div>
+  <div class="chat-container">
+    <div class="chat-messages" id="chat-messages"></div>
+  </div>
 
-    <script>
-        // State
-        const state = {
-            currentStep: 0,
-            answers: {},
-            tempData: {},
-            tickets: [{ name: '', price: '', quantity: '' }]
+  <script>
+    // State
+    const state = {
+      currentStep: 0,
+      answers: {},
+      tempData: {},
+      tickets: [{ name: '', price: '', quantity: '' }]
+    };
+
+    // Questions config — removed promo_codes, custom_email, custom_eticket
+    // Added event_location as first question
+    const questions = [
+      {
+        id: 'event_location',
+        question: "Hey! Let's build your event together. First, **where do you have an event**?",
+        type: 'choice',
+        choices: [
+          { label: 'UAE', desc: 'United Arab Emirates' },
+          { label: 'Oman', desc: 'Sultanate of Oman' }
+        ],
+        required: true
+      },
+      {
+        id: 'event_title',
+        question: "Great! What's the **name of your event**?",
+        type: 'text',
+        placeholder: "e.g., Dubai Music Festival 2026",
+        validate: (val) => val.length >= 3 ? null : "Event name should be at least 3 characters",
+        required: true
+      },
+      {
+        id: 'event_date',
+        question: "When is **the event date**?",
+        type: 'date',
+        required: true
+      },
+      {
+        id: 'start_time',
+        question: "What time does the event **start**?",
+        type: 'time',
+        required: true
+      },
+      {
+        id: 'end_time',
+        question: "And when does it **end**?",
+        type: 'time',
+        required: true
+      },
+      {
+        id: 'doors_open',
+        question: "When do **doors open**?",
+        type: 'time',
+        required: false,
+        skipText: "Same as start time"
+      },
+      {
+        id: 'venue_name',
+        question: "Where is the event? **Venue name**:",
+        type: 'text',
+        placeholder: "e.g., Coca-Cola Arena",
+        validate: (val) => val.length >= 2 ? null : "Please enter a valid venue name",
+        required: true
+      },
+      {
+        id: 'venue_address',
+        question: "What's the **full address** of the venue?",
+        type: 'text',
+        placeholder: "e.g., City Walk, Al Wasl, Dubai",
+        required: false,
+        skipText: "I'll provide later"
+      },
+      {
+        id: 'seating_type',
+        question: "What's the **seating arrangement**?",
+        type: 'choice',
+        choices: [
+          { label: 'General Admission', desc: 'Standing / Free seating' },
+          { label: 'Seated', desc: 'Assigned seats' },
+          { label: 'Mixed', desc: 'Both standing & seated areas' }
+        ],
+        required: true
+      },
+      {
+        id: 'capacity',
+        question: "What's the **total capacity**?",
+        type: 'number',
+        min: 10,
+        max: 100000,
+        default: 1000,
+        step: 100,
+        required: true
+      },
+      {
+        id: 'ticket_categories',
+        question: "Let's set up **ticket categories**. Add your ticket types:",
+        type: 'tickets',
+        required: true
+      },
+      {
+        id: 'banner_url',
+        question: "Do you have an **event banner**? Share the link:",
+        type: 'text',
+        placeholder: "https://drive.google.com/... or image URL",
+        validate: (val) => (val.startsWith('http://') || val.startsWith('https://')) ? null : "Please enter a valid URL",
+        required: false,
+        skipText: "I'll send it separately"
+      },
+      {
+        id: 'event_description',
+        question: "Write a short **event description**:",
+        type: 'textarea',
+        placeholder: "Make it exciting! Describe what attendees can expect...",
+        validate: (val) => val.length >= 20 ? null : "Write at least 20 characters",
+        required: true
+      },
+      {
+        id: 'additional_notes',
+        question: "Any **additional notes** for your Tech Manager?",
+        type: 'textarea',
+        placeholder: "Special requirements, notes, etc...",
+        required: false,
+        skipText: "Nothing else!"
+      }
+    ];
+
+    const chatMessages = document.getElementById('chat-messages');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    // Update progress
+    function updateProgress() {
+      const progress = (state.currentStep / questions.length) * 100;
+      progressFill.style.width = `${progress}%`;
+      progressText.textContent = `${state.currentStep} / ${questions.length}`;
+    }
+
+    // Add message
+    function addMessage(content, isUser = false, isHtml = false) {
+      const msg = document.createElement('div');
+      msg.className = `message ${isUser ? 'user' : 'bot'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = isUser ? 'U' : 'P';
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      if (isHtml) {
+        bubble.innerHTML = content;
+      } else {
+        bubble.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      }
+
+      contentDiv.appendChild(bubble);
+      msg.appendChild(avatar);
+      msg.appendChild(contentDiv);
+      chatMessages.appendChild(msg);
+
+      return contentDiv;
+    }
+
+    // Show typing
+    function showTyping() {
+      const msg = document.createElement('div');
+      msg.className = 'message bot';
+      msg.id = 'typing';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = 'P';
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+      content.appendChild(bubble);
+
+      msg.appendChild(avatar);
+      msg.appendChild(content);
+      chatMessages.appendChild(msg);
+      scrollToBottom();
+    }
+
+    function hideTyping() {
+      const t = document.getElementById('typing');
+      if (t) t.remove();
+    }
+
+    function scrollToBottom() {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // Render input based on type
+    function renderInput(question, contentDiv) {
+      const controls = document.createElement('div');
+      controls.className = 'input-controls';
+
+      switch (question.type) {
+        case 'text':
+        case 'textarea':
+          renderTextInput(question, controls);
+          break;
+        case 'date':
+          renderDatePicker(question, controls);
+          break;
+        case 'time':
+          renderTimePicker(question, controls);
+          break;
+        case 'choice':
+          renderChoiceButtons(question, controls);
+          break;
+        case 'number':
+          renderNumberInput(question, controls);
+          break;
+        case 'tickets':
+          renderTicketBuilder(question, controls);
+          break;
+      }
+
+      contentDiv.appendChild(controls);
+      scrollToBottom();
+    }
+
+    // Text Input
+    function renderTextInput(question, container) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'text-input-wrapper';
+
+      const input = question.type === 'textarea'
+        ? document.createElement('textarea')
+        : document.createElement('input');
+      input.className = 'text-input';
+      input.placeholder = question.placeholder || 'Type here...';
+      if (question.type !== 'textarea') input.type = 'text';
+
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = 'Continue &rarr;';
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(submitBtn);
+      container.appendChild(wrapper);
+
+      if (!question.required && question.skipText) {
+        const actionRow = document.createElement('div');
+        actionRow.className = 'action-row';
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'skip-btn';
+        skipBtn.textContent = question.skipText;
+        skipBtn.onclick = () => submitAnswer(null, question.skipText);
+        actionRow.appendChild(skipBtn);
+        container.appendChild(actionRow);
+      }
+
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.style.display = 'none';
+      container.appendChild(errorDiv);
+
+      submitBtn.onclick = () => {
+        const val = input.value.trim();
+        if (!val && question.required) {
+          errorDiv.textContent = '\u26a0\ufe0f This field is required';
+          errorDiv.style.display = 'flex';
+          return;
+        }
+        if (val && question.validate) {
+          const err = question.validate(val);
+          if (err) {
+            errorDiv.textContent = '\u26a0\ufe0f ' + err;
+            errorDiv.style.display = 'flex';
+            return;
+          }
+        }
+        submitAnswer(val || null);
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitBtn.click();
+        }
+      });
+
+      setTimeout(() => input.focus(), 100);
+    }
+
+    // Date Picker
+    function renderDatePicker(question, container) {
+      const picker = document.createElement('div');
+      picker.className = 'date-picker';
+
+      let currentDate = new Date();
+      let selectedDate = null;
+
+      function render() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const months = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+
+        picker.innerHTML = `
+          <div class="date-header">
+            <button class="date-nav" id="prev-month">\u2039</button>
+            <span class="date-month-year">${months[month]} ${year}</span>
+            <button class="date-nav" id="next-month">\u203a</button>
+          </div>
+          <div class="date-weekdays">
+            <span class="date-weekday">Su</span>
+            <span class="date-weekday">Mo</span>
+            <span class="date-weekday">Tu</span>
+            <span class="date-weekday">We</span>
+            <span class="date-weekday">Th</span>
+            <span class="date-weekday">Fr</span>
+            <span class="date-weekday">Sa</span>
+          </div>
+          <div class="date-days" id="date-days"></div>
+        `;
+
+        const daysContainer = picker.querySelector('#date-days');
+
+        for (let i = 0; i < firstDay; i++) {
+          const empty = document.createElement('button');
+          empty.className = 'date-day empty';
+          daysContainer.appendChild(empty);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const btn = document.createElement('button');
+          btn.className = 'date-day';
+          btn.textContent = day;
+
+          const thisDate = new Date(year, month, day);
+          if (thisDate < today) {
+            btn.classList.add('disabled');
+          } else {
+            if (thisDate.toDateString() === today.toDateString()) btn.classList.add('today');
+            if (selectedDate && thisDate.toDateString() === selectedDate.toDateString()) btn.classList.add('selected');
+            btn.onclick = () => { selectedDate = thisDate; render(); };
+          }
+          daysContainer.appendChild(btn);
+        }
+
+        picker.querySelector('#prev-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); render(); };
+        picker.querySelector('#next-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); render(); };
+      }
+
+      render();
+      container.appendChild(picker);
+
+      const actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
+
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = 'Continue &rarr;';
+      submitBtn.onclick = () => {
+        if (!selectedDate) { alert('Please select a date'); return; }
+        const formatted = `${String(selectedDate.getDate()).padStart(2,'0')}/${String(selectedDate.getMonth()+1).padStart(2,'0')}/${selectedDate.getFullYear()}`;
+        submitAnswer(formatted);
+      };
+
+      actionRow.appendChild(submitBtn);
+      container.appendChild(actionRow);
+      scrollToBottom();
+    }
+
+    // Time Picker
+    function renderTimePicker(question, container) {
+      const picker = document.createElement('div');
+      picker.className = 'time-picker';
+
+      let hours = 19;
+      let minutes = 0;
+
+      function render() {
+        picker.innerHTML = `
+          <div class="time-display">${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}</div>
+          <div class="time-selectors">
+            <div class="time-selector">
+              <label>Hours</label>
+              <div class="time-buttons">
+                <button class="time-btn" id="hour-up">\u25b2</button>
+                <div class="time-value">${String(hours).padStart(2,'0')}</div>
+                <button class="time-btn" id="hour-down">\u25bc</button>
+              </div>
+            </div>
+            <div class="time-selector">
+              <label>Minutes</label>
+              <div class="time-buttons">
+                <button class="time-btn" id="min-up">\u25b2</button>
+                <div class="time-value">${String(minutes).padStart(2,'0')}</div>
+                <button class="time-btn" id="min-down">\u25bc</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        picker.querySelector('#hour-up').onclick = () => { hours = (hours + 1) % 24; render(); };
+        picker.querySelector('#hour-down').onclick = () => { hours = (hours - 1 + 24) % 24; render(); };
+        picker.querySelector('#min-up').onclick = () => { minutes = (minutes + 15) % 60; render(); };
+        picker.querySelector('#min-down').onclick = () => { minutes = (minutes - 15 + 60) % 60; render(); };
+      }
+
+      render();
+      container.appendChild(picker);
+
+      const actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
+
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = 'Continue &rarr;';
+      submitBtn.onclick = () => {
+        const formatted = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+        submitAnswer(formatted);
+      };
+
+      actionRow.appendChild(submitBtn);
+
+      if (!question.required && question.skipText) {
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'skip-btn';
+        skipBtn.textContent = question.skipText;
+        skipBtn.onclick = () => submitAnswer(null, question.skipText);
+        actionRow.appendChild(skipBtn);
+      }
+
+      container.appendChild(actionRow);
+      scrollToBottom();
+    }
+
+    // Choice Buttons
+    function renderChoiceButtons(question, container) {
+      const buttons = document.createElement('div');
+      buttons.className = 'choice-buttons';
+
+      question.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = `<strong>${choice.label}</strong><br><small style="color: var(--gray)">${choice.desc}</small>`;
+        btn.onclick = () => submitAnswer(choice.label);
+        buttons.appendChild(btn);
+      });
+
+      container.appendChild(buttons);
+      scrollToBottom();
+    }
+
+    // Number Input
+    function renderNumberInput(question, container) {
+      let value = question.default || 1000;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'number-input-wrapper';
+
+      function render() {
+        wrapper.innerHTML = `
+          <button class="number-btn" id="num-down">\u2212</button>
+          <div class="number-display">${value.toLocaleString()}</div>
+          <button class="number-btn" id="num-up">+</button>
+        `;
+
+        wrapper.querySelector('#num-down').onclick = () => {
+          value = Math.max(question.min || 0, value - (question.step || 100));
+          render();
         };
+        wrapper.querySelector('#num-up').onclick = () => {
+          value = Math.min(question.max || 100000, value + (question.step || 100));
+          render();
+        };
+      }
 
-        // Questions config
-        const questions = [
-            {
-                id: 'event_title',
-                question: "Hey! Let's build your event together. What's the **name of your event**?",
-                type: 'text',
-                placeholder: "e.g., Dubai Music Festival 2026",
-                validate: (val) => val.length >= 3 ? null : "Event name should be at least 3 characters",
-                required: true
-            },
-            {
-                id: 'event_date',
-                question: "When is **the event date**?",
-                type: 'date',
-                required: true
-            },
-            {
-                id: 'start_time',
-                question: "What time does the event **start**?",
-                type: 'time',
-                required: true
-            },
-            {
-                id: 'end_time',
-                question: "And when does it **end**?",
-                type: 'time',
-                required: true
-            },
-            {
-                id: 'doors_open',
-                question: "When do **doors open**?",
-                type: 'time',
-                required: false,
-                skipText: "Same as start time"
-            },
-            {
-                id: 'venue_name',
-                question: "Where is the event? **Venue name**:",
-                type: 'text',
-                placeholder: "e.g., Coca-Cola Arena",
-                validate: (val) => val.length >= 2 ? null : "Please enter a valid venue name",
-                required: true
-            },
-            {
-                id: 'venue_address',
-                question: "What's the **full address** of the venue?",
-                type: 'text',
-                placeholder: "e.g., City Walk, Al Wasl, Dubai",
-                required: false,
-                skipText: "I'll provide later"
-            },
-            {
-                id: 'seating_type',
-                question: "What's the **seating arrangement**?",
-                type: 'choice',
-                choices: [
-                    { label: 'General Admission', desc: 'Standing / Free seating' },
-                    { label: 'Seated', desc: 'Assigned seats' },
-                    { label: 'Mixed', desc: 'Both standing & seated areas' }
-                ],
-                required: true
-            },
-            {
-                id: 'capacity',
-                question: "What's the **total capacity**?",
-                type: 'number',
-                min: 10,
-                max: 100000,
-                default: 1000,
-                step: 100,
-                required: true
-            },
-            {
-                id: 'ticket_categories',
-                question: "Let's set up **ticket categories**. Add your ticket types:",
-                type: 'tickets',
-                required: true
-            },
-            {
-                id: 'promo_codes',
-                question: "Any **promo codes** needed?",
-                type: 'text',
-                placeholder: "e.g., EARLY20 = 20% off, VIP50 = 50 AED off",
-                required: false,
-                skipText: "No promo codes"
-            },
-            {
-                id: 'banner_url',
-                question: "Do you have an **event banner**? Share the link:",
-                type: 'text',
-                placeholder: "https://drive.google.com/... or image URL",
-                validate: (val) => (val.startsWith('http://') || val.startsWith('https://')) ? null : "Please enter a valid URL",
-                required: false,
-                skipText: "I'll send it separately"
-            },
-            {
-                id: 'event_description',
-                question: "Write a short **event description**:",
-                type: 'textarea',
-                placeholder: "Make it exciting! Describe what attendees can expect...",
-                validate: (val) => val.length >= 20 ? null : "Write at least 20 characters",
-                required: true
-            },
-            {
-                id: 'custom_email',
-                question: "Do you want a **custom confirmation email**?",
-                type: 'choice',
-                choices: [
-                    { label: 'Yes, custom', desc: 'Branded email design' },
-                    { label: 'Standard template', desc: 'Default Platinumlist email' }
-                ],
-                required: true
-            },
-            {
-                id: 'custom_eticket',
-                question: "What about a **custom e-ticket** design?",
-                type: 'choice',
-                choices: [
-                    { label: 'Yes, custom', desc: 'Branded ticket design' },
-                    { label: 'Standard template', desc: 'Default Platinumlist ticket' }
-                ],
-                required: true
-            },
-            {
-                id: 'additional_notes',
-                question: "Any **additional notes** for your Tech Manager?",
-                type: 'textarea',
-                placeholder: "Special requirements, notes, etc...",
-                required: false,
-                skipText: "Nothing else!"
-            }
-        ];
+      render();
+      container.appendChild(wrapper);
 
-        const chatMessages = document.getElementById('chat-messages');
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
+      const actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
 
-        // Update progress
-        function updateProgress() {
-            const progress = (state.currentStep / questions.length) * 100;
-            progressFill.style.width = `${progress}%`;
-            progressText.textContent = `${state.currentStep} / ${questions.length}`;
-        }
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = 'Continue &rarr;';
+      submitBtn.onclick = () => submitAnswer(value.toString());
 
-        // Add message
-        function addMessage(content, isUser = false, isHtml = false) {
-            const msg = document.createElement('div');
-            msg.className = `message ${isUser ? 'user' : 'bot'}`;
+      actionRow.appendChild(submitBtn);
+      container.appendChild(actionRow);
+      scrollToBottom();
+    }
 
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = isUser ? 'U' : 'P';
+    // Ticket Builder
+    function renderTicketBuilder(question, container) {
+      const builder = document.createElement('div');
+      builder.className = 'ticket-builder';
 
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
+      function render() {
+        builder.innerHTML = state.tickets.map((t, i) => `
+          <div class="ticket-item">
+            <div class="ticket-item-header">
+              <span class="ticket-item-title">Ticket ${i + 1}</span>
+              ${state.tickets.length > 1 ? `<button class="ticket-remove" data-idx="${i}">\u00d7</button>` : ''}
+            </div>
+            <div class="ticket-fields">
+              <div class="ticket-field">
+                <input type="text" placeholder="Category (e.g., VIP)" data-idx="${i}" data-field="name" value="${t.name}">
+              </div>
+              <div class="ticket-field">
+                <input type="text" placeholder="Price (e.g., 500 AED)" data-idx="${i}" data-field="price" value="${t.price}">
+                <input type="text" placeholder="Qty" data-idx="${i}" data-field="quantity" value="${t.quantity}" style="max-width: 80px">
+              </div>
+            </div>
+          </div>
+        `).join('') + `<button class="add-ticket-btn">+ Add another ticket type</button>`;
 
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            if (isHtml) {
-                bubble.innerHTML = content;
-            } else {
-                bubble.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            }
+        builder.querySelectorAll('input').forEach(input => {
+          input.oninput = (e) => {
+            const idx = parseInt(e.target.dataset.idx);
+            const field = e.target.dataset.field;
+            state.tickets[idx][field] = e.target.value;
+          };
+        });
 
-            contentDiv.appendChild(bubble);
-            msg.appendChild(avatar);
-            msg.appendChild(contentDiv);
-            chatMessages.appendChild(msg);
-
-            // Return contentDiv for adding controls
-            return contentDiv;
-        }
-
-        // Show typing
-        function showTyping() {
-            const msg = document.createElement('div');
-            msg.className = 'message bot';
-            msg.id = 'typing';
-
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = 'P';
-
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-            content.appendChild(bubble);
-
-            msg.appendChild(avatar);
-            msg.appendChild(content);
-            chatMessages.appendChild(msg);
-            scrollToBottom();
-        }
-
-        function hideTyping() {
-            const t = document.getElementById('typing');
-            if (t) t.remove();
-        }
-
-        function scrollToBottom() {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-
-        // Render input based on type
-        function renderInput(question, contentDiv) {
-            const controls = document.createElement('div');
-            controls.className = 'input-controls';
-
-            switch (question.type) {
-                case 'text':
-                case 'textarea':
-                    renderTextInput(question, controls);
-                    break;
-                case 'date':
-                    renderDatePicker(question, controls);
-                    break;
-                case 'time':
-                    renderTimePicker(question, controls);
-                    break;
-                case 'choice':
-                    renderChoiceButtons(question, controls);
-                    break;
-                case 'number':
-                    renderNumberInput(question, controls);
-                    break;
-                case 'tickets':
-                    renderTicketBuilder(question, controls);
-                    break;
-            }
-
-            contentDiv.appendChild(controls);
-            scrollToBottom();
-        }
-
-        // Text Input
-        function renderTextInput(question, container) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'text-input-wrapper';
-
-            const input = question.type === 'textarea'
-                ? document.createElement('textarea')
-                : document.createElement('input');
-            input.className = 'text-input';
-            input.placeholder = question.placeholder || 'Type here...';
-            if (question.type !== 'textarea') input.type = 'text';
-
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'submit-btn';
-            submitBtn.innerHTML = 'Continue →';
-
-            wrapper.appendChild(input);
-            wrapper.appendChild(submitBtn);
-            container.appendChild(wrapper);
-
-            if (!question.required && question.skipText) {
-                const actionRow = document.createElement('div');
-                actionRow.className = 'action-row';
-                const skipBtn = document.createElement('button');
-                skipBtn.className = 'skip-btn';
-                skipBtn.textContent = question.skipText;
-                skipBtn.onclick = () => submitAnswer(null, question.skipText);
-                actionRow.appendChild(skipBtn);
-                container.appendChild(actionRow);
-            }
-
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.style.display = 'none';
-            container.appendChild(errorDiv);
-
-            submitBtn.onclick = () => {
-                const val = input.value.trim();
-                if (!val && question.required) {
-                    errorDiv.textContent = '⚠️ This field is required';
-                    errorDiv.style.display = 'flex';
-                    return;
-                }
-                if (val && question.validate) {
-                    const err = question.validate(val);
-                    if (err) {
-                        errorDiv.textContent = '⚠️ ' + err;
-                        errorDiv.style.display = 'flex';
-                        return;
-                    }
-                }
-                submitAnswer(val || null);
-            };
-
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    submitBtn.click();
-                }
-            });
-
-            setTimeout(() => input.focus(), 100);
-        }
-
-        // Date Picker
-        function renderDatePicker(question, container) {
-            const picker = document.createElement('div');
-            picker.className = 'date-picker';
-
-            let currentDate = new Date();
-            let selectedDate = null;
-
-            function render() {
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'];
-
-                picker.innerHTML = `
-                    <div class="date-header">
-                        <button class="date-nav" id="prev-month">‹</button>
-                        <span class="date-month-year">${months[month]} ${year}</span>
-                        <button class="date-nav" id="next-month">›</button>
-                    </div>
-                    <div class="date-weekdays">
-                        <span class="date-weekday">Su</span>
-                        <span class="date-weekday">Mo</span>
-                        <span class="date-weekday">Tu</span>
-                        <span class="date-weekday">We</span>
-                        <span class="date-weekday">Th</span>
-                        <span class="date-weekday">Fr</span>
-                        <span class="date-weekday">Sa</span>
-                    </div>
-                    <div class="date-days" id="date-days"></div>
-                `;
-
-                const daysContainer = picker.querySelector('#date-days');
-
-                // Empty cells for days before first
-                for (let i = 0; i < firstDay; i++) {
-                    const empty = document.createElement('button');
-                    empty.className = 'date-day empty';
-                    daysContainer.appendChild(empty);
-                }
-
-                // Days
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const btn = document.createElement('button');
-                    btn.className = 'date-day';
-                    btn.textContent = day;
-
-                    const thisDate = new Date(year, month, day);
-                    if (thisDate < today) {
-                        btn.classList.add('disabled');
-                    } else {
-                        if (thisDate.toDateString() === today.toDateString()) {
-                            btn.classList.add('today');
-                        }
-                        if (selectedDate && thisDate.toDateString() === selectedDate.toDateString()) {
-                            btn.classList.add('selected');
-                        }
-                        btn.onclick = () => {
-                            selectedDate = thisDate;
-                            render();
-                        };
-                    }
-
-                    daysContainer.appendChild(btn);
-                }
-
-                picker.querySelector('#prev-month').onclick = () => {
-                    currentDate.setMonth(currentDate.getMonth() - 1);
-                    render();
-                };
-
-                picker.querySelector('#next-month').onclick = () => {
-                    currentDate.setMonth(currentDate.getMonth() + 1);
-                    render();
-                };
-            }
-
+        builder.querySelectorAll('.ticket-remove').forEach(btn => {
+          btn.onclick = (e) => {
+            const idx = parseInt(e.target.dataset.idx);
+            state.tickets.splice(idx, 1);
             render();
-            container.appendChild(picker);
+          };
+        });
 
-            const actionRow = document.createElement('div');
-            actionRow.className = 'action-row';
+        builder.querySelector('.add-ticket-btn').onclick = () => {
+          state.tickets.push({ name: '', price: '', quantity: '' });
+          render();
+        };
+      }
 
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'submit-btn';
-            submitBtn.innerHTML = 'Continue →';
-            submitBtn.onclick = () => {
-                if (!selectedDate) {
-                    alert('Please select a date');
-                    return;
-                }
-                const formatted = `${String(selectedDate.getDate()).padStart(2, '0')}/${String(selectedDate.getMonth() + 1).padStart(2, '0')}/${selectedDate.getFullYear()}`;
-                submitAnswer(formatted);
-            };
+      render();
+      container.appendChild(builder);
 
-            actionRow.appendChild(submitBtn);
-            container.appendChild(actionRow);
-            scrollToBottom();
+      const actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
+
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = 'Continue &rarr;';
+      submitBtn.onclick = () => {
+        const valid = state.tickets.filter(t => t.name && t.price);
+        if (valid.length === 0) { alert('Please add at least one ticket category'); return; }
+        const formatted = valid.map(t => `${t.name}: ${t.price}${t.quantity ? ' (\u00d7' + t.quantity + ')' : ''}`).join(', ');
+        submitAnswer(formatted);
+      };
+
+      actionRow.appendChild(submitBtn);
+      container.appendChild(actionRow);
+      scrollToBottom();
+    }
+
+    // Submit answer
+    function submitAnswer(value, displayText = null) {
+      const question = questions[state.currentStep];
+
+      addMessage(displayText || value || 'Skipped', true);
+      state.answers[question.id] = value;
+
+      state.currentStep++;
+      updateProgress();
+
+      if (state.currentStep < questions.length) {
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => { hideTyping(); askQuestion(); }, 600);
+        }, 200);
+      } else {
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => { hideTyping(); showSummary(); }, 800);
+        }, 200);
+      }
+    }
+
+    // Ask question
+    function askQuestion() {
+      const question = questions[state.currentStep];
+      const contentDiv = addMessage(question.question);
+      renderInput(question, contentDiv);
+    }
+
+    // =============================
+    // EDIT AT FINAL REVIEW
+    // =============================
+
+    // Label mapping for display
+    const fieldLabels = {
+      event_location: 'Location',
+      event_title: 'Event Name',
+      event_date: 'Date',
+      start_time: 'Start Time',
+      end_time: 'End Time',
+      doors_open: 'Doors Open',
+      venue_name: 'Venue',
+      venue_address: 'Address',
+      seating_type: 'Seating',
+      capacity: 'Capacity',
+      ticket_categories: 'Categories',
+      banner_url: 'Banner',
+      event_description: 'Description',
+      additional_notes: 'Notes'
+    };
+
+    function openEditModal(fieldId) {
+      const question = questions.find(q => q.id === fieldId);
+      if (!question) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'edit-overlay';
+      overlay.id = 'edit-overlay';
+
+      const modal = document.createElement('div');
+      modal.className = 'edit-modal';
+
+      const title = document.createElement('div');
+      title.className = 'edit-modal-title';
+      title.textContent = `Edit: ${fieldLabels[fieldId] || fieldId}`;
+      modal.appendChild(title);
+
+      const inputContainer = document.createElement('div');
+
+      // Render the appropriate edit input based on type
+      if (question.type === 'choice') {
+        const buttons = document.createElement('div');
+        buttons.className = 'choice-buttons';
+        let selectedVal = state.answers[fieldId];
+
+        question.choices.forEach(choice => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn' + (selectedVal === choice.label ? ' selected' : '');
+          btn.innerHTML = `<strong>${choice.label}</strong><br><small style="color: var(--gray)">${choice.desc}</small>`;
+          btn.onclick = () => {
+            selectedVal = choice.label;
+            buttons.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+          };
+          buttons.appendChild(btn);
+        });
+
+        inputContainer.appendChild(buttons);
+
+        // Save handler for choice
+        inputContainer._getValue = () => selectedVal;
+
+      } else if (question.type === 'text' || question.type === 'textarea') {
+        const input = question.type === 'textarea'
+          ? document.createElement('textarea')
+          : document.createElement('input');
+        input.className = 'text-input';
+        input.style.width = '100%';
+        input.placeholder = question.placeholder || 'Type here...';
+        input.value = state.answers[fieldId] || '';
+        if (question.type !== 'textarea') input.type = 'text';
+        inputContainer.appendChild(input);
+
+        inputContainer._getValue = () => input.value.trim() || null;
+
+      } else if (question.type === 'number') {
+        let value = parseInt(state.answers[fieldId]) || question.default || 1000;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'number-input-wrapper';
+
+        function renderNum() {
+          wrapper.innerHTML = `
+            <button class="number-btn" id="edit-num-down">\u2212</button>
+            <div class="number-display">${value.toLocaleString()}</div>
+            <button class="number-btn" id="edit-num-up">+</button>
+          `;
+          wrapper.querySelector('#edit-num-down').onclick = () => {
+            value = Math.max(question.min || 0, value - (question.step || 100));
+            renderNum();
+          };
+          wrapper.querySelector('#edit-num-up').onclick = () => {
+            value = Math.min(question.max || 100000, value + (question.step || 100));
+            renderNum();
+          };
         }
+        renderNum();
+        inputContainer.appendChild(wrapper);
 
-        // Time Picker
-        function renderTimePicker(question, container) {
-            const picker = document.createElement('div');
-            picker.className = 'time-picker';
+        inputContainer._getValue = () => value.toString();
 
-            let hours = 19;
-            let minutes = 0;
+      } else {
+        // Fallback: simple text input for date/time etc
+        const input = document.createElement('input');
+        input.className = 'text-input';
+        input.style.width = '100%';
+        input.value = state.answers[fieldId] || '';
+        input.type = 'text';
+        inputContainer.appendChild(input);
 
-            function render() {
-                picker.innerHTML = `
-                    <div class="time-display">${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}</div>
-                    <div class="time-selectors">
-                        <div class="time-selector">
-                            <label>Hours</label>
-                            <div class="time-buttons">
-                                <button class="time-btn" id="hour-up">▲</button>
-                                <div class="time-value">${String(hours).padStart(2, '0')}</div>
-                                <button class="time-btn" id="hour-down">▼</button>
-                            </div>
-                        </div>
-                        <div class="time-selector">
-                            <label>Minutes</label>
-                            <div class="time-buttons">
-                                <button class="time-btn" id="min-up">▲</button>
-                                <div class="time-value">${String(minutes).padStart(2, '0')}</div>
-                                <button class="time-btn" id="min-down">▼</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+        inputContainer._getValue = () => input.value.trim() || null;
+      }
 
-                picker.querySelector('#hour-up').onclick = () => { hours = (hours + 1) % 24; render(); };
-                picker.querySelector('#hour-down').onclick = () => { hours = (hours - 1 + 24) % 24; render(); };
-                picker.querySelector('#min-up').onclick = () => { minutes = (minutes + 15) % 60; render(); };
-                picker.querySelector('#min-down').onclick = () => { minutes = (minutes - 15 + 60) % 60; render(); };
-            }
+      modal.appendChild(inputContainer);
 
-            render();
-            container.appendChild(picker);
+      // Actions
+      const actions = document.createElement('div');
+      actions.className = 'edit-modal-actions';
 
-            const actionRow = document.createElement('div');
-            actionRow.className = 'action-row';
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'edit-cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => overlay.remove();
 
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'submit-btn';
-            submitBtn.innerHTML = 'Continue →';
-            submitBtn.onclick = () => {
-                const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                submitAnswer(formatted);
-            };
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'edit-save-btn';
+      saveBtn.textContent = 'Save';
+      saveBtn.onclick = () => {
+        const newVal = inputContainer._getValue();
+        state.answers[fieldId] = newVal;
+        overlay.remove();
+        // Re-render summary
+        refreshSummary();
+      };
 
-            actionRow.appendChild(submitBtn);
+      actions.appendChild(cancelBtn);
+      actions.appendChild(saveBtn);
+      modal.appendChild(actions);
 
-            if (!question.required && question.skipText) {
-                const skipBtn = document.createElement('button');
-                skipBtn.className = 'skip-btn';
-                skipBtn.textContent = question.skipText;
-                skipBtn.onclick = () => submitAnswer(null, question.skipText);
-                actionRow.appendChild(skipBtn);
-            }
+      overlay.appendChild(modal);
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    }
 
-            container.appendChild(actionRow);
-            scrollToBottom();
-        }
+    // Refresh summary card after edit
+    function refreshSummary() {
+      const card = document.querySelector('.summary-card');
+      if (!card) return;
 
-        // Choice Buttons
-        function renderChoiceButtons(question, container) {
-            const buttons = document.createElement('div');
-            buttons.className = 'choice-buttons';
+      card.innerHTML = buildSummaryInner();
+    }
 
-            question.choices.forEach(choice => {
-                const btn = document.createElement('button');
-                btn.className = 'choice-btn';
-                btn.innerHTML = `<strong>${choice.label}</strong><br><small style="color: var(--gray)">${choice.desc}</small>`;
-                btn.onclick = () => submitAnswer(choice.label);
-                buttons.appendChild(btn);
-            });
+    function buildSummaryInner() {
+      return `
+        <div class="summary-header">
+          <div class="summary-icon">\ud83d\udccb</div>
+          <div>
+            <div class="summary-title">Event Build Request</div>
+            <div class="summary-subtitle">Ready to send to Tech Manager</div>
+          </div>
+        </div>
 
-            container.appendChild(buttons);
-            scrollToBottom();
-        }
+        <div class="summary-section">
+          <div class="summary-section-title">Event Details</div>
+          ${summaryItem('Location', state.answers.event_location, 'event_location')}
+          ${summaryItem('Event Name', state.answers.event_title, 'event_title')}
+          ${summaryItem('Date', state.answers.event_date, 'event_date')}
+          ${summaryItem('Time', state.answers.start_time && state.answers.end_time ? state.answers.start_time + ' - ' + state.answers.end_time : null, 'start_time')}
+          ${summaryItem('Doors Open', state.answers.doors_open, 'doors_open')}
+          ${summaryItem('Venue', state.answers.venue_name, 'venue_name')}
+          ${summaryItem('Address', state.answers.venue_address, 'venue_address')}
+          ${summaryItem('Seating', state.answers.seating_type, 'seating_type')}
+          ${summaryItem('Capacity', state.answers.capacity, 'capacity')}
+        </div>
 
-        // Number Input
-        function renderNumberInput(question, container) {
-            let value = question.default || 1000;
+        <div class="summary-section">
+          <div class="summary-section-title">Tickets</div>
+          ${summaryItem('Categories', state.answers.ticket_categories, 'ticket_categories')}
+        </div>
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'number-input-wrapper';
+        <div class="summary-section">
+          <div class="summary-section-title">Content</div>
+          ${summaryItem('Banner', state.answers.banner_url, 'banner_url')}
+          ${summaryItem('Description', state.answers.event_description, 'event_description')}
+        </div>
 
-            function render() {
-                wrapper.innerHTML = `
-                    <button class="number-btn" id="num-down">−</button>
-                    <div class="number-display">${value.toLocaleString()}</div>
-                    <button class="number-btn" id="num-up">+</button>
-                `;
+        ${state.answers.additional_notes ? `
+        <div class="summary-section">
+          <div class="summary-section-title">Additional Notes</div>
+          ${summaryItem('Notes', state.answers.additional_notes, 'additional_notes')}
+        </div>
+        ` : `
+        <div class="summary-section">
+          <div class="summary-section-title">Additional Notes</div>
+          ${summaryItem('Notes', null, 'additional_notes')}
+        </div>
+        `}
 
-                wrapper.querySelector('#num-down').onclick = () => {
-                    value = Math.max(question.min || 0, value - (question.step || 100));
-                    render();
-                };
-                wrapper.querySelector('#num-up').onclick = () => {
-                    value = Math.min(question.max || 100000, value + (question.step || 100));
-                    render();
-                };
-            }
+        <button class="copy-btn" onclick="copySummary()">
+          \ud83d\udccb Copy for Tech Manager
+        </button>
+      `;
+    }
 
-            render();
-            container.appendChild(wrapper);
+    // Show summary
+    function showSummary() {
+      addMessage("\ud83c\udf89 **All done!** Here's your Event Build Summary. You can **edit** any field before copying:");
 
-            const actionRow = document.createElement('div');
-            actionRow.className = 'action-row';
+      const summaryHtml = `<div class="summary-card">${buildSummaryInner()}</div>`;
+      addMessage(summaryHtml, false, true);
+      scrollToBottom();
+    }
 
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'submit-btn';
-            submitBtn.innerHTML = 'Continue →';
-            submitBtn.onclick = () => submitAnswer(value.toString());
+    function summaryItem(label, value, fieldId) {
+      const displayValue = value || 'Not provided';
+      const cls = value ? '' : 'skipped';
+      const editButton = fieldId
+        ? `<button class="edit-btn" onclick="openEditModal('${fieldId}')">Edit</button>`
+        : '';
+      return `
+        <div class="summary-item">
+          <span class="summary-label">${label}</span>
+          <span class="summary-value ${cls}">${displayValue}</span>
+          ${editButton}
+        </div>
+      `;
+    }
 
-            actionRow.appendChild(submitBtn);
-            container.appendChild(actionRow);
-            scrollToBottom();
-        }
+    function copySummary() {
+      let text = '\ud83d\udccb EVENT BUILD REQUEST\n';
+      text += '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n';
+      text += `Location: ${state.answers.event_location}\n`;
+      text += `Event: ${state.answers.event_title}\n`;
+      text += `Date: ${state.answers.event_date}\n`;
+      text += `Time: ${state.answers.start_time} - ${state.answers.end_time}\n`;
+      text += `Doors: ${state.answers.doors_open || 'Same as start'}\n`;
+      text += `Venue: ${state.answers.venue_name}\n`;
+      text += `Address: ${state.answers.venue_address || 'TBD'}\n`;
+      text += `Seating: ${state.answers.seating_type}\n`;
+      text += `Capacity: ${state.answers.capacity}\n\n`;
+      text += `Tickets: ${state.answers.ticket_categories}\n\n`;
+      text += `Banner: ${state.answers.banner_url || 'Will send separately'}\n`;
+      text += `Description: ${state.answers.event_description}\n`;
+      if (state.answers.additional_notes) {
+        text += `\nNotes: ${state.answers.additional_notes}\n`;
+      }
+      text += '\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n';
+      text += 'Generated via Platinumlist Event Build Assistant';
 
-        // Ticket Builder
-        function renderTicketBuilder(question, container) {
-            const builder = document.createElement('div');
-            builder.className = 'ticket-builder';
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.innerHTML = '\u2705 Copied to clipboard!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '\ud83d\udccb Copy for Tech Manager';
+          btn.classList.remove('copied');
+        }, 2500);
+      });
+    }
 
-            function render() {
-                builder.innerHTML = state.tickets.map((t, i) => `
-                    <div class="ticket-item">
-                        <div class="ticket-item-header">
-                            <span class="ticket-item-title">Ticket ${i + 1}</span>
-                            ${state.tickets.length > 1 ? `<button class="ticket-remove" data-idx="${i}">×</button>` : ''}
-                        </div>
-                        <div class="ticket-fields">
-                            <div class="ticket-field">
-                                <input type="text" placeholder="Category (e.g., VIP)" data-idx="${i}" data-field="name" value="${t.name}">
-                            </div>
-                            <div class="ticket-field">
-                                <input type="text" placeholder="Price (e.g., 500 AED)" data-idx="${i}" data-field="price" value="${t.price}">
-                                <input type="text" placeholder="Qty" data-idx="${i}" data-field="quantity" value="${t.quantity}" style="max-width: 80px">
-                            </div>
-                        </div>
-                    </div>
-                `).join('') + `<button class="add-ticket-btn">+ Add another ticket type</button>`;
-
-                builder.querySelectorAll('input').forEach(input => {
-                    input.oninput = (e) => {
-                        const idx = parseInt(e.target.dataset.idx);
-                        const field = e.target.dataset.field;
-                        state.tickets[idx][field] = e.target.value;
-                    };
-                });
-
-                builder.querySelectorAll('.ticket-remove').forEach(btn => {
-                    btn.onclick = (e) => {
-                        const idx = parseInt(e.target.dataset.idx);
-                        state.tickets.splice(idx, 1);
-                        render();
-                    };
-                });
-
-                builder.querySelector('.add-ticket-btn').onclick = () => {
-                    state.tickets.push({ name: '', price: '', quantity: '' });
-                    render();
-                };
-            }
-
-            render();
-            container.appendChild(builder);
-
-            const actionRow = document.createElement('div');
-            actionRow.className = 'action-row';
-
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'submit-btn';
-            submitBtn.innerHTML = 'Continue →';
-            submitBtn.onclick = () => {
-                const valid = state.tickets.filter(t => t.name && t.price);
-                if (valid.length === 0) {
-                    alert('Please add at least one ticket category');
-                    return;
-                }
-                const formatted = valid.map(t => `${t.name}: ${t.price}${t.quantity ? ' (×' + t.quantity + ')' : ''}`).join(', ');
-                submitAnswer(formatted);
-            };
-
-            actionRow.appendChild(submitBtn);
-            container.appendChild(actionRow);
-            scrollToBottom();
-        }
-
-        // Submit answer
-        function submitAnswer(value, displayText = null) {
-            const question = questions[state.currentStep];
-
-            // Add user message
-            addMessage(displayText || value || 'Skipped', true);
-
-            // Save answer
-            state.answers[question.id] = value;
-
-            // Next step
-            state.currentStep++;
-            updateProgress();
-
-            if (state.currentStep < questions.length) {
-                setTimeout(() => {
-                    showTyping();
-                    setTimeout(() => {
-                        hideTyping();
-                        askQuestion();
-                    }, 600);
-                }, 200);
-            } else {
-                setTimeout(() => {
-                    showTyping();
-                    setTimeout(() => {
-                        hideTyping();
-                        showSummary();
-                    }, 800);
-                }, 200);
-            }
-        }
-
-        // Ask question
-        function askQuestion() {
-            const question = questions[state.currentStep];
-            const contentDiv = addMessage(question.question);
-            renderInput(question, contentDiv);
-        }
-
-        // Show summary
-        function showSummary() {
-            addMessage("🎉 **All done!** Here's your Event Build Summary:");
-
-            const summaryHtml = `
-                <div class="summary-card">
-                    <div class="summary-header">
-                        <div class="summary-icon">📋</div>
-                        <div>
-                            <div class="summary-title">Event Build Request</div>
-                            <div class="summary-subtitle">Ready to send to Tech Manager</div>
-                        </div>
-                    </div>
-
-                    <div class="summary-section">
-                        <div class="summary-section-title">Event Details</div>
-                        ${summaryItem('Event Name', state.answers.event_title)}
-                        ${summaryItem('Date', state.answers.event_date)}
-                        ${summaryItem('Time', `${state.answers.start_time} - ${state.answers.end_time}`)}
-                        ${summaryItem('Doors Open', state.answers.doors_open)}
-                        ${summaryItem('Venue', state.answers.venue_name)}
-                        ${summaryItem('Address', state.answers.venue_address)}
-                        ${summaryItem('Seating', state.answers.seating_type)}
-                        ${summaryItem('Capacity', state.answers.capacity)}
-                    </div>
-
-                    <div class="summary-section">
-                        <div class="summary-section-title">Tickets & Pricing</div>
-                        ${summaryItem('Categories', state.answers.ticket_categories)}
-                        ${summaryItem('Promo Codes', state.answers.promo_codes)}
-                    </div>
-
-                    <div class="summary-section">
-                        <div class="summary-section-title">Content & Design</div>
-                        ${summaryItem('Banner', state.answers.banner_url)}
-                        ${summaryItem('Description', state.answers.event_description)}
-                        ${summaryItem('Custom Email', state.answers.custom_email)}
-                        ${summaryItem('Custom E-Ticket', state.answers.custom_eticket)}
-                    </div>
-
-                    ${state.answers.additional_notes ? `
-                    <div class="summary-section">
-                        <div class="summary-section-title">Additional Notes</div>
-                        <p style="color: var(--gray); font-size: 14px;">${state.answers.additional_notes}</p>
-                    </div>
-                    ` : ''}
-
-                    <button class="copy-btn" onclick="copySummary()">
-                        📋 Copy for Tech Manager
-                    </button>
-                </div>
-            `;
-
-            addMessage(summaryHtml, false, true);
-            scrollToBottom();
-        }
-
-        function summaryItem(label, value) {
-            const displayValue = value || 'Not provided';
-            const cls = value ? '' : 'skipped';
-            return `
-                <div class="summary-item">
-                    <span class="summary-label">${label}</span>
-                    <span class="summary-value ${cls}">${displayValue}</span>
-                </div>
-            `;
-        }
-
-        function copySummary() {
-            let text = '📋 EVENT BUILD REQUEST\n';
-            text += '══════════════════════════\n\n';
-            text += `Event: ${state.answers.event_title}\n`;
-            text += `Date: ${state.answers.event_date}\n`;
-            text += `Time: ${state.answers.start_time} - ${state.answers.end_time}\n`;
-            text += `Doors: ${state.answers.doors_open || 'Same as start'}\n`;
-            text += `Venue: ${state.answers.venue_name}\n`;
-            text += `Address: ${state.answers.venue_address || 'TBD'}\n`;
-            text += `Seating: ${state.answers.seating_type}\n`;
-            text += `Capacity: ${state.answers.capacity}\n\n`;
-            text += `Tickets: ${state.answers.ticket_categories}\n`;
-            text += `Promos: ${state.answers.promo_codes || 'None'}\n\n`;
-            text += `Banner: ${state.answers.banner_url || 'Will send separately'}\n`;
-            text += `Description: ${state.answers.event_description}\n\n`;
-            text += `Custom Email: ${state.answers.custom_email}\n`;
-            text += `Custom E-Ticket: ${state.answers.custom_eticket}\n`;
-            if (state.answers.additional_notes) {
-                text += `\nNotes: ${state.answers.additional_notes}\n`;
-            }
-            text += '\n══════════════════════════\n';
-            text += 'Generated via Platinumlist Event Build Assistant';
-
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                btn.innerHTML = '✅ Copied to clipboard!';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.innerHTML = '📋 Copy for Tech Manager';
-                    btn.classList.remove('copied');
-                }, 2500);
-            });
-        }
-
-        // Start
-        setTimeout(() => askQuestion(), 400);
-    </script>
+    // Start
+    setTimeout(() => askQuestion(), 400);
+  </script>
 </body>
 </html>
